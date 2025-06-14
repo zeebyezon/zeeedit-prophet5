@@ -4,11 +4,13 @@
 #include "LayoutProcessor.h"
 #include "../ParameterMap.h"
 #include "../PluginProcessorBase.h"
+#include "../ThreadSafeQueue.h"
 
 #include <melatonin_inspector/melatonin_inspector.h>
 
-ZeeEditGui::ZeeEditGui(PluginProcessorBase& pluginProcessor, juce::AudioProcessorValueTreeState& valueTreeState) :
-    AudioProcessorEditor(&pluginProcessor)
+ZeeEditGui::ZeeEditGui(PluginProcessorBase& pluginProcessor, juce::AudioProcessorValueTreeState& valueTreeState, ThreadSafeQueue<juce::MidiBuffer>& inputMidiMessageQueue) :
+    AudioProcessorEditor(&pluginProcessor),
+    m_inputMidiMessageQueue(inputMidiMessageQueue)
 {
     for (const settings::WidgetPanel& panel : ParameterMap::getPanels())
     {
@@ -40,4 +42,12 @@ void ZeeEditGui::paint(juce::Graphics& g)
 
 void ZeeEditGui::resized()
 {
+}
+
+void ZeeEditGui::changeListenerCallback (juce::ChangeBroadcaster* /*source*/)
+{
+    m_inputMidiMessageQueue.popAll([this](const juce::MidiBuffer& midiBuffer)
+    {
+        // TODO
+    });
 }

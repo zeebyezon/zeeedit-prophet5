@@ -19,7 +19,7 @@ public:
 
     juce::AudioProcessorEditor* createEditor() override;
 
-    void pushMessage(juce::MidiMessage message);
+    void pushOutputMessage(juce::MidiMessage message);
 
 protected:
     juce::AudioProcessorValueTreeState& getParameters() override { return m_parameters; }
@@ -27,10 +27,14 @@ protected:
 
 private:
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
-    juce::AudioProcessorValueTreeState::Listener& addParameterListener(int channel, int ccNumber);
+    void createParameterListeners();
+    juce::AudioProcessorValueTreeState::Listener& createParameterListener(int channel, int ccNumber);
 
 private:
     juce::AudioProcessorValueTreeState m_parameters;
     std::vector<std::unique_ptr<juce::AudioProcessorValueTreeState::Listener>> m_parameterListeners;
-    ThreadSafeQueue<juce::MidiMessage> m_midiMessageQueue;
+    ThreadSafeQueue<juce::MidiMessage> m_outputMidiMessageQueue;
+
+    ThreadSafeQueue<juce::MidiBuffer> m_inputMidiMessageQueue;
+    juce::ChangeBroadcaster m_changeBroadcaster;
 };
